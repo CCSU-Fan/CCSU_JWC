@@ -3,9 +3,11 @@ error_reporting(0);
 $u = $_GET["u"];
 $p = $_GET["p"];
 $kksj=$_GET["term"];
+$type=$_GET["type"];
 if($u == null)exit;
 if($p == null)exit;
 if($kksj == null)exit;
+if($type == null)exit;
 function login($url, $post, $headers, $cookie){ 
     $ch = curl_init(); 
     curl_setopt($ch, CURLOPT_URL, $url); 
@@ -20,7 +22,7 @@ function login($url, $post, $headers, $cookie){
     curl_close($ch); 
     return $rs; 
 } 
-function get_kb($url, $post, $cookie){ 
+function get_cj($url, $post, $cookie){ 
     $ch = curl_init(); 
     curl_setopt($ch, CURLOPT_URL, $url); 
     curl_setopt($ch, CURLOPT_HEADER, 0); 
@@ -33,7 +35,19 @@ function get_kb($url, $post, $cookie){
     curl_close($ch); 
     return $rs; 
 } 
-
+function get_kb($url, $cookie){ 
+    $ch = curl_init(); 
+    curl_setopt($ch, CURLOPT_URL, $url); 
+    curl_setopt($ch, CURLOPT_HEADER, 0); 
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+	//curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie); //读取cookie 
+	//curl_setopt($ch, CURLOPT_POST, 1);//post方式提交 
+   // curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post));//要提交的信息 
+    $rs = curl_exec($ch);
+    curl_close($ch); 
+    return $rs; 
+}
 
 $headers = array(
 	'Cache-Control: max-age=0',
@@ -69,6 +83,8 @@ else{
 }
 
 
+
+if($type=='cj'){
 $post_kb = array(
     'kksj'=> $kksj,
     'kcxz'=> '',
@@ -80,9 +96,9 @@ $post_kb = array(
 	'ok'=> '',
 );
 //kksj=2019-2020-1&kcxz=&kcmc=&xsfs=zhcj&kcdl=&kssj=&ok=
-$get_kb = get_kb('http://jwcxxcx.ccsu.cn/jwxt/xszqcjglAction.do?method=queryxscj', $post_kb, $cookie);
+$get_cj = get_cj('http://jwcxxcx.ccsu.cn/jwxt/xszqcjglAction.do?method=queryxscj', $post_kb, $cookie);
 
-$kclb = strstr($get_kb, 'tblHeadDiv');
+$kclb = strstr($get_cj, 'tblHeadDiv');
 $kclb=strstr($kclb, 'printHQL', true);
 $kclb = strstr($kclb, '向下移动记录');
 $kclb = strstr($kclb, 'table-layout');
@@ -117,10 +133,18 @@ $score=mb_substr($score, 1, null);
 $cj_arr[$i]=$score;//成绩
 }
 
-$marks = array("xm"=>$xm,"kksj"=>$kksj,"msg"=>$msg,"name"=>$course_arr,"score"=>$cj_arr);
+$marks = array("xm"=>$xm,"kksj"=>$kksj,"msg"=>$msg,"type"=>$type,"name"=>$course_arr,"score"=>$cj_arr);
 echo json_encode($marks,JSON_UNESCAPED_UNICODE);
+}
 
-
-
-
+elseif($type=='kb'){
+$kb_url="http://jwcxxcx.ccsu.cn/jwxt/tkglAction.do?method=goListKbByXs&istsxx=no&xnxqh=$kksj&zc=&xs0101id=$u";
+$get_kb=get_kb($kb_url, $cookie);
+echo $get_kb;
+}
+else{
+	$marks = array("msg"=>"无该接口");
+	echo json_encode($marks,JSON_UNESCAPED_UNICODE);
+	exit;
+}
 
