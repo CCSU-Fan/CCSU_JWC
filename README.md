@@ -1,6 +1,4 @@
 # CCSU_JWC
-造了一个轮子~~~~
-演示接口：http://114.116.118.203/ccsujwc.html<br>
 
 环境;PHP7.0+Apache 加php-curl扩展<br>
 长沙学院的教务处为强智科技系统，理论上该系统的学校都可以查询<br>
